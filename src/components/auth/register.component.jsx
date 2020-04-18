@@ -1,38 +1,123 @@
 import React from "react";
-
+import { ToastsStore } from 'react-toasts';
+import FormatUrl from "../../utils/UrlFormatter";
+import { Link } from 'react-router-dom';
 
 class Register extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-
+          email: null,
+          name: null,
+          username: null,
+          password: null,
+          confirm_password: null,
+          terms: null
         }
     }
 
+    handleRegister = (ev) => {
+      ev.preventDefault();
+      const { email, name, username, password, confirm_password, terms } = this.state;
+      if(!email){
+        ToastsStore.warning("email required", 3000, "custom-toaster");
+        return
+      }
+
+      if(!name){
+        ToastsStore.warning("name required", 3000, "custom-toaster");
+        return
+      }
+
+      if(!username){
+        ToastsStore.warning("username required", 3000, "custom-toaster");
+        return
+      }
+
+      if(!password){
+        ToastsStore.warning("password required", 3000, "custom-toaster");
+        return
+      }
+
+      if(!confirm_password){
+        ToastsStore.warning("confirm_password required", 3000, "custom-toaster");
+        return
+      }
+
+      if(password !== confirm_password){
+        ToastsStore.warning("password should match", 3000, "custom-toaster");
+        return
+      }
+
+
+      let url = FormatUrl(`/api/auth/register/`)
+      fetch(url, {
+      method: 'POST',
+      headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+          email: email,
+          name: name,
+          password: password,
+          username: username
+      })
+      })
+      .then(response => response.json())
+      .then(res => {
+        if(res.code === 200){
+          ToastsStore.warning("Membership created", 3000, "custom-toaster");
+          this.props.history.push("/")
+        } else {
+          ToastsStore.warning("Failed to register", 3000, "custom-toaster");
+        }
+      }).catch(err => {
+        ToastsStore.warning("Failed to register", 3000, "custom-toaster");
+      })
+    }
+
+
+    componentDidMount(){
+      const auth_token = localStorage.getItem("auth_token")
+      if(auth_token){
+        this.props.history.push("/dashboard")
+      }
+    }
+
+    
     render(){
         return (
-            <form className="mt-4">
+            <form className="mt-4" onSubmit={this.handleRegister}>
               <div className="form-group">
-                <label htmlFor="exampleInputEmail1">Your Full Name</label>
-                <input type="email" className="form-control mb-0" id="exampleInputEmail1" placeholder="Your Full Name" />
+                <label>Email address</label>
+                <input type="email" onChange={(e) => this.setState({email: e.target.value})} className="form-control mb-0" placeholder="Email" />
               </div>
               <div className="form-group">
-                <label htmlFor="exampleInputEmail2">Email address</label>
-                <input type="email" className="form-control mb-0" id="exampleInputEmail2" placeholder="Enter email" />
+                <label>Company Name</label>
+                <input type="text" onChange={(e) => this.setState({name: e.target.value})} className="form-control mb-0" placeholder="Company name" />
               </div>
               <div className="form-group">
-                <label htmlFor="exampleInputPassword1">Password</label>
-                <input type="password" className="form-control mb-0" id="exampleInputPassword1" placeholder="Password" />
+                <label>Username</label>
+                <input type="text" onChange={(e) => this.setState({username: e.target.value})}  className="form-control mb-0" placeholder="Username" />
+              </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input type="password" onChange={(e) => this.setState({password: e.target.value})} className="form-control mb-0" placeholder="Password" />
+              </div>
+              <div className="form-group">
+                <label>Confirm Password</label>
+                <input type="password" onChange={(e) => this.setState({confirm_password: e.target.value})} className="form-control mb-0" placeholder="Retype password" />
               </div>
               <div className="d-inline-block w-100">
                 <div className="custom-control custom-checkbox d-inline-block mt-2 pt-1">
-                  <input type="checkbox" className="custom-control-input" id="customCheck1" />
-                  <label className="custom-control-label" htmlFor="customCheck1">I accept <a href="#">Terms and Conditions</a></label>
+                  <input type="checkbox" className="custom-control-input" id="customCheck1" onChange={(e) => this.setState({terms: e.target.value})} />
+                  <label className="custom-control-label" htmlFor="customCheck1">I accept <a >Terms and Conditions</a></label>
                 </div>
                 <button type="submit" className="btn btn-primary float-right">Sign Up</button>
               </div>
               <div className="sign-info text-center">
-                <span className="dark-color d-inline-block line-height-2">Already Have Account ? <a title className="pointer" onClick={() => this.props.handleForm("login")}>Log In</a></span>
+                <span className="dark-color d-inline-block line-height-2">Already Have Account ? <Link title className="pointer" to="/">Log In</Link></span>
               </div>
             </form>
         )

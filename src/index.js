@@ -14,10 +14,14 @@ ReactDOM.render(
       <div></div>}> 
           <Switch>
             {indexRoutes.map((prop, key) => {
-              return <Route exact path={prop.path} key={key} component={prop.component} />;
+              return <Route exact={prop.exact} path={prop.path} key={key} component={prop.component} />;
             })}
           </Switch>
         </Suspense>
       </Router>,
   document.getElementById("root")
 );
+
+
+
+
